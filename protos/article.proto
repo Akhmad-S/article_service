@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option go_package = "./blogpost";
+import "protos/common.proto";
+
+// The service definition.
+service ArticleService{
+    // Sends a greeting
+    rpc SayHello(HelloRequest)returns(HelloReply){}
+}
