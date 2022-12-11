@@ -1,0 +1,1 @@
+ALTER TABLE author ADD COLUMN middle_name VARCHAR(100);
