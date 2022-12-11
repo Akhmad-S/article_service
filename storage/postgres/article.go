@@ -29,7 +29,7 @@ func (stg Postgres) ReadArticleById(id string) (models.PackedArticleModel, error
 		&res.Id, &res.Content.Title, &res.Content.Body, &res.Created_at, &res.Updated_at, &res.Deleted_at, &res.Author.Id, &res.Author.Fullname, &res.Author.Created_at, &res.Author.Updated_at, &res.Author.Deleted_at,
 	)
 	if err != nil {
-		return res, err
+		return res, errors.New("article not found")
 	}
 
 	return res, nil

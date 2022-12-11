@@ -22,7 +22,7 @@ import (
 	"github.com/uacademy/blogpost/article_service/storage/postgres"
 )
 
-func initGRPC(){
+func initGRPC(stg storage.StorageI){
 	println("gRPC server tutorial in Go")
 
 	listener, err := net.Listen("tcp", ":9000")
@@ -31,7 +31,7 @@ func initGRPC(){
 	}
 
 	s := grpc.NewServer()
-	blogpost.RegisterArticleServiceServer(s, &article.ArticleService{})
+	blogpost.RegisterArticleServiceServer(s, article.NewArticleService(stg))
 	blogpost.RegisterAuthorServiceServer(s,&author.AuthorService{})
 	reflection.Register(s)
 	if err := s.Serve(listener); err != nil {
@@ -40,10 +40,6 @@ func initGRPC(){
 }
 
 func main() {
-	initGRPC()
-
-	fmt.Println("----------------->")
-
 	cfg := config.Load()
 
 	psqlConString := fmt.Sprintf(
@@ -55,22 +51,23 @@ func main() {
 		cfg.PostgresDatabase,
 	)
 
-	// programmatically set swagger info
-	docs.SwaggerInfo.Title = cfg.App
-	docs.SwaggerInfo.Version = cfg.AppVersion
-
 	var stg storage.StorageI
 	stg, err := postgres.InitDb(psqlConString)
 	if err != nil {
 		panic(err)
 	}
 
+	go initGRPC(stg)
+
 	if cfg.Environment != "development" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	r := gin.New()
+	// programmatically set swagger info
+	docs.SwaggerInfo.Title = cfg.App
+	docs.SwaggerInfo.Version = cfg.AppVersion
 
+	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery()) // Later they will be replaced by custom Logger and Recovery
 
 	//template GET method

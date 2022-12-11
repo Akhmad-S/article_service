@@ -20,7 +20,7 @@ func (stg Postgres) ReadAuthorById(id string) (models.Author, error) {
 		&res.Id, &res.Fullname, &res.Created_at, &res.Updated_at, &res.Deleted_at,
 	)
 	if err != nil {
-		return res, err
+		return res, errors.New("author not found")
 	}
 	return res, nil
 }
