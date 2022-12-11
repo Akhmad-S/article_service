@@ -3,7 +3,7 @@ package postgres
 import (
 	"errors"
 
-	"github.com/uacademy/article/models"
+	"github.com/uacademy/blogpost/article_service/models"
 )
 
 func (stg Postgres) AddArticle(id string, input models.CreateArticleModel) error {
@@ -26,12 +26,12 @@ func (stg Postgres) ReadArticleById(id string) (models.PackedArticleModel, error
 		ar.id, ar.title, ar.body, ar.created_at, ar.updated_at, ar.deleted_at,
 		au.id, au.fullname, au.created_at, au.updated_at, au.deleted_at  
 		FROM article ar JOIN author au ON ar.author_id = au.id WHERE ar.id = $1`, id).Scan(
-			&res.Id, &res.Content.Title, &res.Content.Body, &res.Created_at, &res.Updated_at, &res.Deleted_at, &res.Author.Id, &res.Author.Fullname, &res.Author.Created_at, &res.Author.Updated_at, &res.Author.Deleted_at,
-		)
-	if err != nil{
+		&res.Id, &res.Content.Title, &res.Content.Body, &res.Created_at, &res.Updated_at, &res.Deleted_at, &res.Author.Id, &res.Author.Fullname, &res.Author.Created_at, &res.Author.Updated_at, &res.Author.Deleted_at,
+	)
+	if err != nil {
 		return res, err
 	}
-	
+
 	return res, nil
 }
 
@@ -49,7 +49,7 @@ func (stg Postgres) ReadListArticle(offset, limit int, search string) (list []mo
 	OFFSET $3
 	`, search, limit, offset)
 
-	if err != nil{
+	if err != nil {
 		return list, err
 	}
 	for rows.Next() {

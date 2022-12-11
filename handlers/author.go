@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/uacademy/article/models"
+	"github.com/uacademy/blogpost/article_service/models"
 )
 
 // CreateAuthor godoc

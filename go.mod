@@ -1,4 +1,4 @@
-module github.com/uacademy/article
+module github.com/uacademy/blogpost/article_service
 
 go 1.18
 

@@ -1,7 +1,7 @@
 package postgres
 
 import (
-	"github.com/uacademy/article/models"
+	"github.com/uacademy/blogpost/article_service/models"
 
 	"errors"
 )

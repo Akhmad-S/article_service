@@ -8,7 +8,7 @@ import (
 
 	"net/http"
 
-	"github.com/uacademy/article/models"
+	"github.com/uacademy/blogpost/article_service/models"
 )
 
 // CreateArticle godoc

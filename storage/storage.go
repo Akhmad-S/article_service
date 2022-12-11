@@ -1,6 +1,6 @@
 package storage
 
-import "github.com/uacademy/article/models"
+import "github.com/uacademy/blogpost/article_service/models"
 
 type StorageI interface {
 	AddArticle(id string, input models.CreateArticleModel) error
