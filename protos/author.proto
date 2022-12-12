@@ -54,5 +54,4 @@ message GetAuthorByIdResponse{
     string fullname = 2;
     string created_at = 3;
     string updated_at = 4;
-    string deleted_at = 5;
 }

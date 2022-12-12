@@ -147,9 +147,8 @@ func (s *authorService) GetAuthorById(ctx context.Context, req *authorproto.GetA
 		updatedAt = author.Updated_at.String()
 	}
 
-	var deletedAt string
 	if author.Deleted_at != nil {
-		deletedAt = author.Deleted_at.String()
+		return nil, status.Errorf(codes.Internal, "s.stg.ReadAuthorById: author with id: %s not found", req.Id)
 	}
 
 	return &authorproto.GetAuthorByIdResponse{
@@ -157,6 +156,5 @@ func (s *authorService) GetAuthorById(ctx context.Context, req *authorproto.GetA
 		Fullname: author.Fullname,
 		CreatedAt: author.Created_at.String(),
 		UpdatedAt: updatedAt,
-		DeletedAt: deletedAt,
 	}, nil
 }

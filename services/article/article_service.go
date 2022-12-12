@@ -169,9 +169,8 @@ func (s *articleService) GetArticleById(ctx context.Context, req *articleproto.G
 		updatedAt = article.Updated_at.String()
 	}
 
-	var deletedAt string
 	if article.Deleted_at != nil {
-		deletedAt = article.Deleted_at.String()
+		return nil, status.Errorf(codes.NotFound, "s.stg.ReadArticleById: article with id: %s not found", req.Id)
 	}
 
 	var authorUpdatedAt string
@@ -193,6 +192,5 @@ func (s *articleService) GetArticleById(ctx context.Context, req *articleproto.G
 		},
 		CreatedAt: article.Created_at.String(),
 		UpdatedAt: updatedAt,
-		DeletedAt: deletedAt,
 	}, nil
 }
