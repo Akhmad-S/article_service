@@ -32,7 +32,7 @@ func initGRPC(stg storage.StorageI){
 
 	s := grpc.NewServer()
 	blogpost.RegisterArticleServiceServer(s, article.NewArticleService(stg))
-	blogpost.RegisterAuthorServiceServer(s,&author.AuthorService{})
+	blogpost.RegisterAuthorServiceServer(s, author.NewAuthorService(stg))
 	reflection.Register(s)
 	if err := s.Serve(listener); err != nil {
 		log.Fatalf("failed to serve: %v", err)

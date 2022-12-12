@@ -7,4 +7,52 @@ import "protos/common.proto";
 service AuthorService{
     // Sends a greeting
     rpc SayHello(HelloRequest)returns(HelloReply){}
+
+    rpc CreateAuthor(CreateAuthorRequest)returns(Author){}
+    rpc UpdateAuthor(UpdateAuthorRequest)returns(Author){}
+    rpc DeleteAuthor(DeleteAuthorRequest)returns(Author){}
+    rpc GetAuthorList(GetAuthorListRequest)returns(GetAuthorListResponse){}
+    rpc GetAuthorById(GetAuthorByIdRequest)returns(GetAuthorByIdResponse){}
+}
+
+message CreateAuthorRequest{
+    string fullname = 1;
+}
+
+message UpdateAuthorRequest{
+    string id = 1;
+    string fullname = 2;
+}
+
+message DeleteAuthorRequest{
+    string id = 1;
+}
+
+message GetAuthorListRequest{
+    int32 offset = 1;
+    int32 limit = 2;
+    string search = 3;
+}
+
+message GetAuthorByIdRequest{
+    string id = 1;
+}
+
+message Author{
+    string id = 1;
+    string fullname = 2;
+    string created_at = 3;
+    string updated_at = 4;
+}
+
+message GetAuthorListResponse{
+    repeated Author authors = 1;
+}
+
+message GetAuthorByIdResponse{
+    string id = 1;
+    string fullname = 2;
+    string created_at = 3;
+    string updated_at = 4;
+    string deleted_at = 5;
 }

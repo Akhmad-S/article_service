@@ -16,7 +16,7 @@ func (stg Postgres) AddAuthor(id string, input models.CreateAuthorModel) error {
 
 func (stg Postgres) ReadAuthorById(id string) (models.Author, error) {
 	var res models.Author
-	err := stg.db.QueryRow(`SELECT id, fullname, created_at, updated_at, deleted_at FROM author WHERE id=$1`, id).Scan(
+	err := stg.db.QueryRow(`SELECT id, fullname, created_at, updated_at, deleted_at FROM author WHERE id=$1 AND deleted_at IS NULL`, id).Scan(
 		&res.Id, &res.Fullname, &res.Created_at, &res.Updated_at, &res.Deleted_at,
 	)
 	if err != nil {
