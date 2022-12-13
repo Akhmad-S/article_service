@@ -2,14 +2,19 @@ package postgres
 
 import (
 	"errors"
+	"time"
 
-	"github.com/uacademy/blogpost/article_service/models"
+	"github.com/uacademy/blogpost/article_service/proto-gen/blogpost"
 )
 
-func (stg Postgres) AddArticle(id string, input models.CreateArticleModel) error {
+func (stg Postgres) AddArticle(id string, input *blogpost.CreateArticleRequest) error {
 	_, err := stg.ReadAuthorById(input.AuthorId)
 	if err != nil {
 		return err
+	}
+
+	if input.Content == nil{
+		input.Content = &blogpost.Content{}
 	}
 
 	_, err = stg.db.Exec(`INSERT INTO article (id, title, body, author_id) VALUES ($1, $2, $3, $4)`, id, input.Content.Title, input.Content.Body, input.AuthorId)
@@ -19,61 +24,92 @@ func (stg Postgres) AddArticle(id string, input models.CreateArticleModel) error
 	return nil
 }
 
-func (stg Postgres) ReadArticleById(id string) (models.PackedArticleModel, error) {
-	var res models.PackedArticleModel
+func (stg Postgres) ReadArticleById(id string) (*blogpost.GetArticleByIdResponse, error) {
+	res := &blogpost.GetArticleByIdResponse{
+		Content: &blogpost.Content{},
+		Author: &blogpost.GetArticleByIdResponse_Author{},
+	}
+	var deletedAt *time.Time
+	var updatedAt, authorUpdatedAt *string
 
 	err := stg.db.QueryRow(`SELECT
 		ar.id, ar.title, ar.body, ar.created_at, ar.updated_at, ar.deleted_at,
-		au.id, au.fullname, au.created_at, au.updated_at, au.deleted_at  
+		au.id, au.fullname, au.created_at, au.updated_at  
 		FROM article ar JOIN author au ON ar.author_id = au.id WHERE ar.id = $1`, id).Scan(
-		&res.Id, &res.Content.Title, &res.Content.Body, &res.Created_at, &res.Updated_at, &res.Deleted_at, &res.Author.Id, &res.Author.Fullname, &res.Author.Created_at, &res.Author.Updated_at, &res.Author.Deleted_at,
+		&res.Id, &res.Content.Title, &res.Content.Body, &res.CreatedAt, &updatedAt, &deletedAt, &res.Author.Id, &res.Author.Fullname, &res.Author.CreatedAt, &authorUpdatedAt,
 	)
 	if err != nil {
+		return res, err
+	}
+
+	if updatedAt != nil{
+		res.UpdatedAt = *updatedAt
+	}
+
+	if authorUpdatedAt != nil{
+		res.Author.UpdatedAt = *authorUpdatedAt
+	}
+
+	if deletedAt != nil{
 		return res, errors.New("article not found")
 	}
 
 	return res, nil
 }
 
-func (stg Postgres) ReadListArticle(offset, limit int, search string) (list []models.Article, err error) {
+func (stg Postgres) ReadListArticle(offset, limit int, search string) (*blogpost.GetArticleListResponse, error) {
+	resp := &blogpost.GetArticleListResponse{
+		Articles: make([]*blogpost.Article, 0),
+	}
+
 	rows, err := stg.db.Queryx(`SELECT
 	id,
 	title,
 	body,
 	author_id,
 	created_at,
-	updated_at,
-	deleted_at
+	updated_at
 	FROM article WHERE deleted_at IS NULL AND ((title ILIKE '%' || $1 || '%') OR (body ILIKE '%' || $1 || '%'))
 	LIMIT $2
 	OFFSET $3
 	`, search, limit, offset)
 
 	if err != nil {
-		return list, err
+		return resp, err
 	}
 	for rows.Next() {
-		var a models.Article
+		a := &blogpost.Article{
+			Content: &blogpost.Content{},
+		}
+
+		var updatedAt *string
 
 		err := rows.Scan(
 			&a.Id,
 			&a.Content.Title,
 			&a.Content.Body,
 			&a.AuthorId,
-			&a.Created_at,
-			&a.Updated_at,
-			&a.Deleted_at,
+			&a.CreatedAt,
+			&updatedAt,
 		)
 		if err != nil {
-			return list, err
+			return resp, err
 		}
-		list = append(list, a)
+
+		if updatedAt != nil{
+			a.UpdatedAt = *updatedAt
+		}
+		resp.Articles = append(resp.Articles, a)
 	}
 
-	return list, err
+	return resp, err
 }
 
-func (stg Postgres) UpdateArticle(input models.UpdateArticleModel) error {
+func (stg Postgres) UpdateArticle(input *blogpost.UpdateArticleRequest) error {
+	if input.Content == nil{
+		input.Content = &blogpost.Content{}
+	}
+
 	res, err := stg.db.NamedExec("UPDATE article  SET title=:t, body=:b, updated_at=now() WHERE deleted_at IS NULL AND id=:id", map[string]interface{}{
 		"id": input.Id,
 		"t":  input.Content.Title,
